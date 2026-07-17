@@ -152,6 +152,7 @@ const TIPS = [
 const input = document.querySelector("#ingredients");
 const analyzeBtn = document.querySelector("#analyzeBtn");
 const clearBtn = document.querySelector("#clearBtn");
+const shareBtn = document.querySelector("#shareBtn");
 const foodSearch = document.querySelector("#foodSearch");
 const categoryTabs = document.querySelector("#categoryTabs");
 const verdict = document.querySelector("#verdict");
@@ -379,6 +380,22 @@ document.querySelectorAll("[data-example]").forEach(button => {
 analyzeBtn.addEventListener("click", analyze);
 input.addEventListener("input", analyze);
 foodSearch.addEventListener("input", renderKnownList);
+shareBtn.addEventListener("click", async () => {
+  const shareData = {
+    title: "榨汁搭配助手",
+    text: "输入食材，判断榨汁搭配、口感和常见注意事项。",
+    url: "https://zhuolingcheng.github.io/juice-helper/"
+  };
+  if (navigator.share) {
+    await navigator.share(shareData).catch(() => {});
+    return;
+  }
+  await navigator.clipboard?.writeText(shareData.url).catch(() => {});
+  shareBtn.textContent = "已复制";
+  window.setTimeout(() => {
+    shareBtn.textContent = "分享";
+  }, 1600);
+});
 clearBtn.addEventListener("click", () => {
   input.value = "";
   renderRecognized([], []);
