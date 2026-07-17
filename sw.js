@@ -1,4 +1,4 @@
-const CACHE_NAME = "juice-helper-v13";
+const CACHE_NAME = "juice-helper-v14";
 const ASSETS = [
   "./",
   "./index.html",

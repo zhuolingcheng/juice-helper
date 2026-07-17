@@ -270,6 +270,7 @@ const shareText = document.querySelector("#shareText");
 const shareStatus = document.querySelector("#shareStatus");
 const copyShareBtn = document.querySelector("#copyShareBtn");
 const saveBlendBtn = document.querySelector("#saveBlendBtn");
+const todayIdeaBtn = document.querySelector("#todayIdeaBtn");
 const foodSearch = document.querySelector("#foodSearch");
 const categoryTabs = document.querySelector("#categoryTabs");
 const verdict = document.querySelector("#verdict");
@@ -290,6 +291,7 @@ let activeCategory = "全部";
 let currentAnalysis = null;
 
 const FAVORITES_KEY = "juice-helper-favorites-v1";
+const PREFS_KEY = "juice-helper-preferences-v1";
 const GOAL_RECIPES = {
   breakfast: {
     label: "早餐饱腹",
@@ -312,6 +314,16 @@ const GOAL_RECIPES = {
     ingredients: "香蕉、草莓、酸奶、燕麦"
   }
 };
+
+const TODAY_IDEAS = [
+  "橙子、胡萝卜、苹果、姜",
+  "黄瓜、柠檬、薄荷、冰块",
+  "香蕉、酸奶、蓝莓、燕麦",
+  "菠菜、橙子、香蕉、酸奶",
+  "猕猴桃、梨、黄瓜、薄荷",
+  "草莓、香蕉、酸奶、奇亚籽",
+  "菠萝、黄瓜、青柠、椰子水"
+];
 
 function sum(items, key) {
   return items.reduce((total, item) => total + (item[key] || 0), 0);
@@ -356,15 +368,19 @@ function analyze() {
   }
 
   const metrics = getMetrics(matched);
-  const warningList = COMMON_WARNINGS.filter(rule => rule.test(matched)).map(rule => rule.text);
-  const noteList = buildNotes(matched, metrics);
-  const suggestionList = buildSuggestions(matched, metrics, warningList);
+  const prefs = getPreferences();
+  const warningList = [
+    ...COMMON_WARNINGS.filter(rule => rule.test(matched)).map(rule => rule.text),
+    ...buildPreferenceWarnings(matched, metrics, prefs)
+  ];
+  const noteList = buildNotes(matched, metrics, prefs);
+  const suggestionList = buildSuggestions(matched, metrics, warningList, prefs);
   const recipeList = buildRecipePlan(matched, metrics);
   const finalScore = Math.max(35, Math.min(98, Math.round(metrics.score - warningList.length * 7)));
   const verdictText = finalScore >= 82 ? "很适合，稍作微调更好" : finalScore >= 68 ? "可以搭配，留意细节" : "能做，但建议调整";
-  const summary = buildSummaryLine(matched, metrics, finalScore, warningList);
+  const summary = buildSummaryLine(matched, metrics, finalScore, warningList, prefs);
 
-  currentAnalysis = { items: matched, metrics, warningList, finalScore, verdictText, summary, recipeList };
+  currentAnalysis = { items: matched, metrics, warningList, finalScore, verdictText, summary, recipeList, prefs };
   verdict.textContent = verdictText;
   summaryLine.textContent = summary;
   score.textContent = finalScore;
@@ -408,7 +424,51 @@ function getIngredientIcon(item) {
   return INGREDIENT_ICONS[item.name] || TYPE_ICONS[item.type] || "•";
 }
 
-function buildSummaryLine(items, m, finalScore, warningList) {
+function getPreferences() {
+  const prefs = {};
+  document.querySelectorAll("[data-pref]").forEach(input => {
+    prefs[input.dataset.pref] = input.checked;
+  });
+  return prefs;
+}
+
+function loadPreferences() {
+  let saved = {};
+  try {
+    saved = JSON.parse(localStorage.getItem(PREFS_KEY) || "{}");
+  } catch {
+    saved = {};
+  }
+  document.querySelectorAll("[data-pref]").forEach(input => {
+    input.checked = Boolean(saved[input.dataset.pref]);
+  });
+}
+
+function savePreferences() {
+  localStorage.setItem(PREFS_KEY, JSON.stringify(getPreferences()));
+}
+
+function buildPreferenceWarnings(items, m, prefs) {
+  const list = [];
+  if (prefs.lowSugar && m.sugar >= 8) {
+    list.push("你开启了控糖偏好：这杯甜度偏高，建议高糖水果减半，不额外加蜂蜜或糖浆。");
+  }
+  if (prefs.acidSensitive && m.acid >= 6) {
+    list.push("你开启了胃酸敏感提醒：这杯酸度偏明显，空腹或反酸时建议少量尝试。");
+  }
+  if (prefs.hideGreens && items.some(item => item.type === "蔬菜") && m.bitter + m.earthy >= 4) {
+    list.push("你标记了怕菜味：这杯可能有生青味，建议加橙子、莓果、香蕉或一点柠檬提亮。");
+  }
+  if (prefs.medication && items.some(item => item.grapefruit)) {
+    list.push("你标记了正在服药：西柚/葡萄柚需要重点确认药物相互作用，先问医生或药师。");
+  }
+  if (prefs.kidney && sum(items, "potassium") >= 5) {
+    list.push("你开启了限钾/肾病提醒：香蕉、牛油果、椰子水等高钾食材建议谨慎控制量。");
+  }
+  return list;
+}
+
+function buildSummaryLine(items, m, finalScore, warningList, prefs = {}) {
   const scoreMood = finalScore >= 82 ? "这杯很有戏" : finalScore >= 68 ? "这杯可以做" : "这杯能做，但别急着一股脑开打";
   const texture = m.creamy >= 7
     ? "会偏奶昔，入口比较厚"
@@ -420,6 +480,10 @@ function buildSummaryLine(items, m, finalScore, warningList) {
   let watch = "整体没有明显硬伤";
   if (warningList.length) {
     watch = "但有注意事项，先看一眼再决定量";
+  } else if (prefs.lowSugar && m.sugar >= 7) {
+    watch = "按你的控糖偏好，甜味食材可以再收一点";
+  } else if (prefs.hideGreens && items.some(item => item.type === "蔬菜")) {
+    watch = "按你的口味，建议用柑橘或莓果把菜味压住";
   } else if (m.sugar >= 9) {
     watch = "不过甜度偏高，像饮品也像甜品";
   } else if (m.bitter + m.earthy > m.sweet + m.acid + 2) {
@@ -625,7 +689,7 @@ function renderFavorites() {
   });
 }
 
-function buildNotes(items, m) {
+function buildNotes(items, m, prefs = {}) {
   const list = [];
   const names = items.map(i => i.name).join("、");
   list.push(`已识别 ${items.length} 种食材：${names}。`);
@@ -637,10 +701,12 @@ function buildNotes(items, m) {
   if (items.some(i => i.vitaminC) && items.some(i => i.leafy)) list.push("维 C 丰富的水果搭配绿叶菜，风味更亮，也有助于提高植物性铁吸收。");
   if (items.some(i => i.spice >= 4)) list.push("辛辣调味存在感很强，建议从一小片姜或少量辣椒开始，避免盖过水果香。");
   if (items.some(i => i.fat >= 4) && m.creamy >= 8) list.push("脂肪和稠度都偏高，会更像浓厚甜品杯；用水、冰块或酸味水果能拉轻。");
+  if (prefs.lowSugar) list.push("你已开启控糖偏好：后续推荐会优先倾向无糖酸奶、黄瓜、冰块和低糖水果。");
+  if (prefs.hideGreens) list.push("你已开启怕菜味偏好：绿叶菜比例建议保守，用柑橘、莓果或香蕉来兜底。");
   return list;
 }
 
-function buildSuggestions(items, m, warningList) {
+function buildSuggestions(items, m, warningList, prefs = {}) {
   const list = [];
   const hasLiquid = items.some(i => ["乳制品", "植物奶", "液体"].includes(i.type));
   const hasCream = m.creamy >= 4;
@@ -652,6 +718,10 @@ function buildSuggestions(items, m, warningList) {
   if (!hasCream && !items.some(i => i.name === "香蕉")) list.push("想要奶昔口感，可加半根香蕉、少量燕麦、酸奶或牛油果。");
   if (!hasProtein) list.push("如果把它当早餐，建议加入无糖酸奶、豆浆或花生酱，让饱腹感更稳。");
   if (m.sugar >= 9) list.push("把高糖水果减半，换成黄瓜、菠菜、无糖酸奶或冰块，甜度会更稳。");
+  if (prefs.lowSugar) list.push("控糖版本：优先用无糖酸奶/无糖豆浆做基底，水果保留 1-2 种即可，不叠加蜂蜜、红枣或葡萄干。");
+  if (prefs.acidSensitive) list.push("胃酸敏感版本：柠檬、青柠、西柚这类强酸少放，用香蕉、酸奶或燕麦把酸感垫住。");
+  if (prefs.hideGreens && items.some(i => i.leafy || i.bitter + i.earthy >= 3)) list.push("怕菜味版本：绿叶菜从半小把开始，搭配橙子、蓝莓或香蕉，比单靠蜂蜜更自然。");
+  if (prefs.kidney) list.push("限钾/肾病提醒：香蕉、牛油果、椰子水不要叠太多，具体摄入量以医嘱为准。");
   if (warningList.length) list.push("因为触发了注意事项，第一次尝试建议少量，并根据服药、肾病、结石史、控糖需求做取舍。");
   list.push(TIPS[(items.length + Math.round(m.taste / 10)) % TIPS.length]);
   return list;
@@ -782,10 +852,38 @@ function renderKnownList() {
   }
 }
 
+function appendIngredient(name) {
+  const existing = input.value.trim();
+  const parts = splitInput(existing).map(token => token.toLowerCase());
+  if (parts.includes(name.toLowerCase())) {
+    analyze();
+    return false;
+  }
+  input.value = existing ? `${existing}、${name}` : name;
+  analyze();
+  return true;
+}
+
+function pickTodayIdea() {
+  const today = new Date();
+  const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  const recipe = TODAY_IDEAS[seed % TODAY_IDEAS.length];
+  input.value = recipe;
+  analyze();
+  fixTip.textContent = "已生成今日灵感。觉得太甜、太稠或菜味重，可以继续点补救按钮微调。";
+}
+
 document.querySelectorAll("[data-example]").forEach(button => {
   button.addEventListener("click", () => {
     input.value = button.dataset.example;
     analyze();
+  });
+});
+
+document.querySelectorAll("[data-rescue]").forEach(button => {
+  button.addEventListener("click", () => {
+    const added = appendIngredient(button.dataset.rescue);
+    fixTip.textContent = added ? `${button.dataset.rescue} 已加入这杯。` : `这杯里已经有 ${button.dataset.rescue} 了。`;
   });
 });
 
@@ -796,6 +894,13 @@ document.querySelectorAll("[data-goal]").forEach(button => {
     input.value = recipe.ingredients;
     analyze();
     fixTip.textContent = `已按「${recipe.label}」生成一杯，可以继续用上面的补救按钮微调。`;
+  });
+});
+
+document.querySelectorAll("[data-pref]").forEach(input => {
+  input.addEventListener("change", () => {
+    savePreferences();
+    if (input.value.trim()) analyze();
   });
 });
 
@@ -813,6 +918,7 @@ analyzeBtn.addEventListener("click", analyze);
 input.addEventListener("input", analyze);
 foodSearch.addEventListener("input", renderKnownList);
 saveBlendBtn.addEventListener("click", saveCurrentBlend);
+todayIdeaBtn.addEventListener("click", pickTodayIdea);
 const shareData = {
   title: "健康果蔬搭配小助手",
   text: "我在用这个健康果蔬搭配小助手：输入水果、蔬菜、酸奶、燕麦等食材，就能判断搭配、口感和常见注意事项。",
@@ -859,6 +965,7 @@ clearBtn.addEventListener("click", () => {
   renderEmpty();
 });
 
+loadPreferences();
 renderCategoryTabs();
 renderKnownList();
 renderEmpty();
