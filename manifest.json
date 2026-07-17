@@ -1,0 +1,19 @@
+﻿{
+  "name": "姒ㄦ眮鎼厤鍔╂墜",
+  "short_name": "姒ㄦ眮鍔╂墜",
+  "description": "杈撳叆姘存灉銆佽敩鑿溿€侀吀濂躲€佺嚂楹︾瓑椋熸潗锛屽垽鏂Θ姹佹惌閰嶃€佸彛鎰熷拰甯歌娉ㄦ剰浜嬮」銆?,
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7faf4",
+  "theme_color": "#2f7d54",
+  "icons": [
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
