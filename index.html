@@ -139,6 +139,19 @@
       </section>
     </main>
 
+    <div class="share-overlay" id="shareOverlay" hidden>
+      <section class="share-panel" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+        <button class="icon-close" id="shareClose" type="button" aria-label="关闭分享面板">×</button>
+        <h2 id="shareTitle">分享榨汁搭配助手</h2>
+        <p id="shareStatus">已准备好分享文案。微信里建议复制后粘贴给好友或群，不使用系统分享。</p>
+        <label for="shareText">分享文案</label>
+        <textarea id="shareText" rows="4" readonly></textarea>
+        <div class="share-actions">
+          <button class="primary" id="copyShareBtn" type="button">复制分享文案</button>
+        </div>
+      </section>
+    </div>
+
     <script src="./app.js"></script>
   </body>
 </html>
