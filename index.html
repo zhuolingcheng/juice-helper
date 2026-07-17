@@ -53,6 +53,17 @@
             <button type="button" data-example="甜菜根、菠菜、杏仁奶、香蕉">运动型</button>
           </div>
 
+          <div class="goal-panel">
+            <label>按目标来一杯</label>
+            <div class="goal-grid" aria-label="按目标推荐搭配">
+              <button type="button" data-goal="breakfast">早餐饱腹</button>
+              <button type="button" data-goal="freshLowSugar">清爽低糖</button>
+              <button type="button" data-goal="postWorkout">运动后</button>
+              <button type="button" data-goal="hideGreens">压住菜味</button>
+              <button type="button" data-goal="kidFriendly">小朋友友好</button>
+            </div>
+          </div>
+
           <div class="controls">
             <button class="primary" id="analyzeBtn" type="button">分析搭配</button>
             <button class="secondary" id="clearBtn" type="button">清空</button>
@@ -82,6 +93,9 @@
           <div class="summary-card" id="summaryCard">
             <p class="summary-label">这杯大概会怎样</p>
             <p id="summaryLine">先把冰箱里的候选食材写上来，我来帮你判断这杯有没有戏。</p>
+            <div class="summary-actions">
+              <button type="button" id="saveBlendBtn">收藏这杯</button>
+            </div>
           </div>
 
           <div class="meter-grid">
@@ -105,6 +119,10 @@
               <div class="tag-list" id="recognized"></div>
             </article>
             <article>
+              <h3>大致比例</h3>
+              <ul id="recipePlan"></ul>
+            </article>
+            <article>
               <h3>搭配评价</h3>
               <ul id="notes"></ul>
             </article>
@@ -122,6 +140,10 @@
               </div>
               <p class="fix-tip" id="fixTip">分析后点一个方向，我会给你更具体的救场方案。</p>
               <ul id="suggestions"></ul>
+            </article>
+            <article>
+              <h3>我的常用搭配</h3>
+              <div class="favorites-list" id="favoritesList"></div>
             </article>
           </div>
         </section>

@@ -269,6 +269,7 @@ const shareClose = document.querySelector("#shareClose");
 const shareText = document.querySelector("#shareText");
 const shareStatus = document.querySelector("#shareStatus");
 const copyShareBtn = document.querySelector("#copyShareBtn");
+const saveBlendBtn = document.querySelector("#saveBlendBtn");
 const foodSearch = document.querySelector("#foodSearch");
 const categoryTabs = document.querySelector("#categoryTabs");
 const verdict = document.querySelector("#verdict");
@@ -279,6 +280,7 @@ const recognized = document.querySelector("#recognized");
 const notes = document.querySelector("#notes");
 const warnings = document.querySelector("#warnings");
 const suggestions = document.querySelector("#suggestions");
+const recipePlan = document.querySelector("#recipePlan");
 const fixTip = document.querySelector("#fixTip");
 const tasteMeter = document.querySelector("#tasteMeter");
 const balanceMeter = document.querySelector("#balanceMeter");
@@ -286,6 +288,30 @@ const riskMeter = document.querySelector("#riskMeter");
 const knownList = document.querySelector("#knownList");
 let activeCategory = "全部";
 let currentAnalysis = null;
+
+const FAVORITES_KEY = "juice-helper-favorites-v1";
+const GOAL_RECIPES = {
+  breakfast: {
+    label: "早餐饱腹",
+    ingredients: "香蕉、酸奶、燕麦、蓝莓、奇亚籽"
+  },
+  freshLowSugar: {
+    label: "清爽低糖",
+    ingredients: "黄瓜、柠檬、薄荷、青柠、冰块"
+  },
+  postWorkout: {
+    label: "运动后",
+    ingredients: "香蕉、酸奶、燕麦、花生酱"
+  },
+  hideGreens: {
+    label: "压住菜味",
+    ingredients: "菠菜、橙子、香蕉、酸奶、蓝莓"
+  },
+  kidFriendly: {
+    label: "小朋友友好",
+    ingredients: "香蕉、草莓、酸奶、燕麦"
+  }
+};
 
 function sum(items, key) {
   return items.reduce((total, item) => total + (item[key] || 0), 0);
@@ -333,11 +359,12 @@ function analyze() {
   const warningList = COMMON_WARNINGS.filter(rule => rule.test(matched)).map(rule => rule.text);
   const noteList = buildNotes(matched, metrics);
   const suggestionList = buildSuggestions(matched, metrics, warningList);
+  const recipeList = buildRecipePlan(matched, metrics);
   const finalScore = Math.max(35, Math.min(98, Math.round(metrics.score - warningList.length * 7)));
   const verdictText = finalScore >= 82 ? "很适合，稍作微调更好" : finalScore >= 68 ? "可以搭配，留意细节" : "能做，但建议调整";
   const summary = buildSummaryLine(matched, metrics, finalScore, warningList);
 
-  currentAnalysis = { items: matched, metrics, warningList, finalScore, verdictText, summary };
+  currentAnalysis = { items: matched, metrics, warningList, finalScore, verdictText, summary, recipeList };
   verdict.textContent = verdictText;
   summaryLine.textContent = summary;
   score.textContent = finalScore;
@@ -345,6 +372,7 @@ function analyze() {
   tasteMeter.style.width = `${metrics.taste}%`;
   balanceMeter.style.width = `${metrics.balance}%`;
   riskMeter.style.width = `${Math.min(100, warningList.length * 24 + metrics.risk)}%`;
+  renderList(recipePlan, recipeList);
   renderList(notes, noteList);
   renderList(warnings, warningList.length ? warningList : ["没有触发常见禁忌规则。仍建议按个人体质、过敏史和服药情况判断。"]);
   renderList(suggestions, suggestionList);
@@ -434,6 +462,72 @@ function getFixAdvice(kind, items, m) {
   return "先分析一杯，再选一个想调整的方向。";
 }
 
+function getRecipeAmount(item, m) {
+  const name = item.name;
+  const amountMap = {
+    香蕉: "半根到 1 根",
+    苹果: "半个",
+    梨: "半个",
+    草莓: "5-8 颗",
+    蓝莓: "一小把",
+    芒果: "半个或一小碗",
+    菠萝: "一小碗",
+    橙子: "半个到 1 个",
+    柠檬: "1-2 小勺汁",
+    西柚: "1/4 个，服药者先确认",
+    猕猴桃: "1 个",
+    西瓜: "一小碗",
+    牛油果: "1/4-1/2 个",
+    菠菜: "一小把",
+    羽衣甘蓝: "半小把",
+    生菜: "2-3 片",
+    芹菜: "半根",
+    黄瓜: "1/3-1/2 根",
+    胡萝卜: "半根",
+    甜菜根: "1/4 个",
+    姜: "1-2 薄片",
+    薄荷: "4-6 片",
+    酸奶: "120-180ml",
+    牛奶: "120-180ml",
+    豆浆: "150ml",
+    杏仁奶: "150ml",
+    燕麦: "15-25g",
+    奇亚籽: "1 小勺，静置会变稠",
+    亚麻籽: "1 小勺",
+    花生酱: "1 小勺",
+    蜂蜜: "半小勺起，能不加就不加",
+    椰子水: "120-180ml",
+    冰块: "3-5 块"
+  };
+
+  if (amountMap[name]) return `${name}：${amountMap[name]}`;
+  if (["乳制品", "植物奶", "液体"].includes(item.type)) return `${name}：120-180ml`;
+  if (item.type === "水果") return `${name}：半个或一小把`;
+  if (item.type === "蔬菜") return `${name}：少量起步，约一小把以内`;
+  if (["谷物", "种子", "坚果"].includes(item.type)) return `${name}：1 小勺到 20g，先少量`;
+  if (item.type === "调味") return `${name}：少量点缀，别让它抢戏`;
+  if (item.type === "甜味") return `${name}：少量起步，先尝再加`;
+  return `${name}：少量尝试`;
+}
+
+function buildRecipePlan(items, m) {
+  const list = items.map(item => getRecipeAmount(item, m));
+  const hasLiquid = items.some(item => ["乳制品", "植物奶", "液体"].includes(item.type));
+  const hasThickener = items.some(item => ["燕麦", "奇亚籽", "亚麻籽"].includes(item.name));
+
+  if (!hasLiquid) {
+    list.push("液体基底：先加 120-180ml 水、酸奶、牛奶或豆浆，再按稠度微调。");
+  }
+  if (m.creamy >= 8 || hasThickener) {
+    list.push("如果打完太稠：每次补 30ml 液体，不要一次倒太多。");
+  }
+  if (m.sugar >= 9) {
+    list.push("想少甜一点：高糖水果先减半，冰块或黄瓜补体积。");
+  }
+  list.push("建议顺序：先液体，再软水果/酸奶，最后放绿叶菜、燕麦和冰块。");
+  return list;
+}
+
 function buildShareMessage() {
   if (!currentAnalysis?.items?.length) {
     return `${shareData.text}\n${shareData.url}`;
@@ -450,6 +544,85 @@ function buildShareMessage() {
     `提醒：${caution}`,
     `你也试试这个小助手：${shareData.url}`
   ].join("\n");
+}
+
+function readFavorites() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeFavorites(favorites) {
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites.slice(0, 8)));
+}
+
+function saveCurrentBlend() {
+  if (!currentAnalysis?.items?.length) {
+    fixTip.textContent = "先分析一杯，再收藏。";
+    return;
+  }
+
+  const names = currentAnalysis.items.map(item => item.name);
+  const key = names.join("、");
+  const favorites = readFavorites().filter(item => item.key !== key);
+  favorites.unshift({
+    key,
+    names,
+    verdict: currentAnalysis.verdictText,
+    summary: currentAnalysis.summary,
+    savedAt: Date.now()
+  });
+  writeFavorites(favorites);
+  renderFavorites();
+  saveBlendBtn.textContent = "已收藏";
+  window.setTimeout(() => {
+    saveBlendBtn.textContent = "收藏这杯";
+  }, 1500);
+}
+
+function renderFavorites() {
+  const favoritesList = document.querySelector("#favoritesList");
+  const favorites = readFavorites();
+  favoritesList.innerHTML = "";
+
+  if (!favorites.length) {
+    const empty = document.createElement("p");
+    empty.className = "favorite-empty";
+    empty.textContent = "还没有收藏。遇到顺口的一杯，点上面的“收藏这杯”。";
+    favoritesList.appendChild(empty);
+    return;
+  }
+
+  favorites.forEach(favorite => {
+    const row = document.createElement("div");
+    row.className = "favorite-item";
+
+    const loadButton = document.createElement("button");
+    loadButton.type = "button";
+    loadButton.className = "favorite-load";
+    loadButton.innerHTML = `<strong></strong><span></span>`;
+    loadButton.querySelector("strong").textContent = favorite.names.join(" + ");
+    loadButton.querySelector("span").textContent = favorite.verdict || "再来一杯";
+    loadButton.addEventListener("click", () => {
+      input.value = favorite.names.join("、");
+      analyze();
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "favorite-delete";
+    deleteButton.textContent = "删";
+    deleteButton.addEventListener("click", () => {
+      writeFavorites(readFavorites().filter(item => item.key !== favorite.key));
+      renderFavorites();
+    });
+
+    row.append(loadButton, deleteButton);
+    favoritesList.appendChild(row);
+  });
 }
 
 function buildNotes(items, m) {
@@ -545,6 +718,7 @@ function renderEmpty() {
   tasteMeter.style.width = "0%";
   balanceMeter.style.width = "0%";
   riskMeter.style.width = "0%";
+  renderList(recipePlan, ["分析后会给出大致比例，比如液体加多少、燕麦放多少、酸味和甜味怎么控制。"]);
   renderList(notes, ["输入食材后会分析甜度、酸度、苦味、稠度和饱腹感。"]);
   renderList(warnings, ["这里会显示常见禁忌或需要谨慎的人群。"]);
   renderList(suggestions, ["这里会给出可执行的调整建议和推荐搭配。"]);
@@ -615,6 +789,16 @@ document.querySelectorAll("[data-example]").forEach(button => {
   });
 });
 
+document.querySelectorAll("[data-goal]").forEach(button => {
+  button.addEventListener("click", () => {
+    const recipe = GOAL_RECIPES[button.dataset.goal];
+    if (!recipe) return;
+    input.value = recipe.ingredients;
+    analyze();
+    fixTip.textContent = `已按「${recipe.label}」生成一杯，可以继续用上面的补救按钮微调。`;
+  });
+});
+
 document.querySelectorAll("[data-fix]").forEach(button => {
   button.addEventListener("click", () => {
     if (!currentAnalysis) {
@@ -628,6 +812,7 @@ document.querySelectorAll("[data-fix]").forEach(button => {
 analyzeBtn.addEventListener("click", analyze);
 input.addEventListener("input", analyze);
 foodSearch.addEventListener("input", renderKnownList);
+saveBlendBtn.addEventListener("click", saveCurrentBlend);
 const shareData = {
   title: "健康果蔬搭配小助手",
   text: "我在用这个健康果蔬搭配小助手：输入水果、蔬菜、酸奶、燕麦等食材，就能判断搭配、口感和常见注意事项。",
@@ -677,6 +862,7 @@ clearBtn.addEventListener("click", () => {
 renderCategoryTabs();
 renderKnownList();
 renderEmpty();
+renderFavorites();
 
 async function copyText(text) {
   if (navigator.clipboard?.writeText) {

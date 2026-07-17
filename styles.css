@@ -171,6 +171,30 @@ textarea:focus {
   margin-top: 14px;
 }
 
+.goal-panel {
+  margin-top: 18px;
+}
+
+.goal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.goal-grid button {
+  justify-content: center;
+  min-width: 0;
+  background: #fffaf0;
+  border-color: #eadfcb;
+  color: #57402a;
+  font-weight: 700;
+}
+
+.goal-grid button:hover {
+  border-color: var(--citrus);
+  background: #fff5dc;
+}
+
 button {
   min-height: 38px;
   border: 1px solid #cbd8d1;
@@ -461,6 +485,21 @@ button:hover {
   line-height: 1.55;
 }
 
+.summary-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 12px;
+}
+
+.summary-actions button {
+  min-height: 34px;
+  border-color: var(--leaf);
+  background: #fff;
+  color: var(--leaf);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 h2 {
   margin: 0;
   font-size: 28px;
@@ -572,6 +611,59 @@ h3 {
   color: #4d4233;
   font-size: 13px;
   line-height: 1.55;
+}
+
+.favorites-list {
+  display: grid;
+  gap: 8px;
+}
+
+.favorite-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.favorite-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.favorite-load {
+  display: grid;
+  justify-items: start;
+  min-width: 0;
+  height: auto;
+  padding: 8px 10px;
+  text-align: left;
+  background: #f7fbf7;
+}
+
+.favorite-load strong,
+.favorite-load span {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favorite-load strong {
+  font-size: 13px;
+}
+
+.favorite-load span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.favorite-delete {
+  min-width: 0;
+  padding: 0;
+  color: #7a4a25;
+  background: #fffaf0;
 }
 
 ul {
