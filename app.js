@@ -153,6 +153,11 @@ const input = document.querySelector("#ingredients");
 const analyzeBtn = document.querySelector("#analyzeBtn");
 const clearBtn = document.querySelector("#clearBtn");
 const shareBtn = document.querySelector("#shareBtn");
+const shareOverlay = document.querySelector("#shareOverlay");
+const shareClose = document.querySelector("#shareClose");
+const shareText = document.querySelector("#shareText");
+const shareStatus = document.querySelector("#shareStatus");
+const copyShareBtn = document.querySelector("#copyShareBtn");
 const foodSearch = document.querySelector("#foodSearch");
 const categoryTabs = document.querySelector("#categoryTabs");
 const verdict = document.querySelector("#verdict");
@@ -380,21 +385,43 @@ document.querySelectorAll("[data-example]").forEach(button => {
 analyzeBtn.addEventListener("click", analyze);
 input.addEventListener("input", analyze);
 foodSearch.addEventListener("input", renderKnownList);
-shareBtn.addEventListener("click", async () => {
-  const shareData = {
-    title: "榨汁搭配助手",
-    text: "输入食材，判断榨汁搭配、口感和常见注意事项。",
-    url: "https://zhuolingcheng.github.io/juice-helper/"
-  };
-  if (navigator.share) {
-    await navigator.share(shareData).catch(() => {});
-    return;
+const shareData = {
+  title: "榨汁搭配助手",
+  text: "我在用这个榨汁搭配助手：输入水果、蔬菜、酸奶、燕麦等食材，就能判断搭配、口感和常见注意事项。",
+  url: "https://zhuolingcheng.github.io/juice-helper/"
+};
+const shareMessage = `${shareData.text}\n${shareData.url}`;
+
+shareBtn.addEventListener("click", () => {
+  shareText.value = shareMessage;
+  shareOverlay.hidden = false;
+  copyText(shareMessage).then(copied => {
+    shareStatus.textContent = copied
+      ? "分享文案已复制。现在打开微信聊天，直接粘贴发送即可。"
+      : "复制可能被浏览器限制。请长按下面文案，手动复制后粘贴到微信。";
+  });
+  copyShareBtn.focus();
+});
+
+shareClose.addEventListener("click", () => {
+  shareOverlay.hidden = true;
+});
+
+shareOverlay.addEventListener("click", event => {
+  if (event.target === shareOverlay) {
+    shareOverlay.hidden = true;
   }
-  await navigator.clipboard?.writeText(shareData.url).catch(() => {});
-  shareBtn.textContent = "已复制";
+});
+
+copyShareBtn.addEventListener("click", async () => {
+  const copied = await copyText(shareMessage);
+  copyShareBtn.textContent = copied ? "已复制" : "请长按文案复制";
+  shareStatus.textContent = copied
+    ? "分享文案已复制。现在打开微信聊天，直接粘贴发送即可。"
+    : "复制可能被浏览器限制。请长按下面文案，手动复制后粘贴到微信。";
   window.setTimeout(() => {
-    shareBtn.textContent = "分享";
-  }, 1600);
+    copyShareBtn.textContent = "复制分享文案";
+  }, 1800);
 });
 clearBtn.addEventListener("click", () => {
   input.value = "";
@@ -405,6 +432,22 @@ clearBtn.addEventListener("click", () => {
 renderCategoryTabs();
 renderKnownList();
 renderEmpty();
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {}
+  }
+  shareText.focus();
+  shareText.select();
+  try {
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  }
+}
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
