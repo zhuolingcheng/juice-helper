@@ -79,6 +79,11 @@
             </div>
           </div>
 
+          <div class="summary-card" id="summaryCard">
+            <p class="summary-label">这杯大概会怎样</p>
+            <p id="summaryLine">先把冰箱里的候选食材写上来，我来帮你判断这杯有没有戏。</p>
+          </div>
+
           <div class="meter-grid">
             <div>
               <span>口感</span>
@@ -109,6 +114,13 @@
             </article>
             <article>
               <h3>推荐调整</h3>
+              <div class="fix-actions" aria-label="快速补救建议">
+                <button type="button" data-fix="fresh">更清爽</button>
+                <button type="button" data-fix="smooth">更顺滑</button>
+                <button type="button" data-fix="lessSugar">降甜度</button>
+                <button type="button" data-fix="hideGreens">压菜味</button>
+              </div>
+              <p class="fix-tip" id="fixTip">分析后点一个方向，我会给你更具体的救场方案。</p>
               <ul id="suggestions"></ul>
             </article>
           </div>

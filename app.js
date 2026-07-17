@@ -274,15 +274,18 @@ const categoryTabs = document.querySelector("#categoryTabs");
 const verdict = document.querySelector("#verdict");
 const score = document.querySelector("#score");
 const scoreRing = document.querySelector("#scoreRing");
+const summaryLine = document.querySelector("#summaryLine");
 const recognized = document.querySelector("#recognized");
 const notes = document.querySelector("#notes");
 const warnings = document.querySelector("#warnings");
 const suggestions = document.querySelector("#suggestions");
+const fixTip = document.querySelector("#fixTip");
 const tasteMeter = document.querySelector("#tasteMeter");
 const balanceMeter = document.querySelector("#balanceMeter");
 const riskMeter = document.querySelector("#riskMeter");
 const knownList = document.querySelector("#knownList");
 let activeCategory = "全部";
+let currentAnalysis = null;
 
 function sum(items, key) {
   return items.reduce((total, item) => total + (item[key] || 0), 0);
@@ -331,8 +334,12 @@ function analyze() {
   const noteList = buildNotes(matched, metrics);
   const suggestionList = buildSuggestions(matched, metrics, warningList);
   const finalScore = Math.max(35, Math.min(98, Math.round(metrics.score - warningList.length * 7)));
+  const verdictText = finalScore >= 82 ? "很适合，稍作微调更好" : finalScore >= 68 ? "可以搭配，留意细节" : "能做，但建议调整";
+  const summary = buildSummaryLine(matched, metrics, finalScore, warningList);
 
-  verdict.textContent = finalScore >= 82 ? "很适合，稍作微调更好" : finalScore >= 68 ? "可以搭配，留意细节" : "能做，但建议调整";
+  currentAnalysis = { items: matched, metrics, warningList, finalScore, verdictText, summary };
+  verdict.textContent = verdictText;
+  summaryLine.textContent = summary;
   score.textContent = finalScore;
   scoreRing.style.background = `conic-gradient(${finalScore >= 70 ? "#2f7d54" : "#b94a3a"} ${finalScore * 3.6}deg, #edf3ed 0deg)`;
   tasteMeter.style.width = `${metrics.taste}%`;
@@ -341,6 +348,7 @@ function analyze() {
   renderList(notes, noteList);
   renderList(warnings, warningList.length ? warningList : ["没有触发常见禁忌规则。仍建议按个人体质、过敏史和服药情况判断。"]);
   renderList(suggestions, suggestionList);
+  fixTip.textContent = "想换个方向，可以点上面的按钮，我会按这杯的实际食材给救场方案。";
 }
 
 function getMetrics(items) {
@@ -370,6 +378,78 @@ function clamp(value) {
 
 function getIngredientIcon(item) {
   return INGREDIENT_ICONS[item.name] || TYPE_ICONS[item.type] || "•";
+}
+
+function buildSummaryLine(items, m, finalScore, warningList) {
+  const scoreMood = finalScore >= 82 ? "这杯很有戏" : finalScore >= 68 ? "这杯可以做" : "这杯能做，但别急着一股脑开打";
+  const texture = m.creamy >= 7
+    ? "会偏奶昔，入口比较厚"
+    : m.acid >= 5
+      ? "会比较清爽，酸甜感会先出来"
+      : m.fiber >= 9
+        ? "饱腹感会比较强"
+        : "口感会偏轻盈";
+  let watch = "整体没有明显硬伤";
+  if (warningList.length) {
+    watch = "但有注意事项，先看一眼再决定量";
+  } else if (m.sugar >= 9) {
+    watch = "不过甜度偏高，像饮品也像甜品";
+  } else if (m.bitter + m.earthy > m.sweet + m.acid + 2) {
+    watch = "只是菜味可能会露头，需要一点水果或酸味压一压";
+  } else if (m.creamy >= 8) {
+    watch = "如果不想太稠，记得加点水或冰块";
+  }
+  return `${scoreMood}，${texture}，${watch}。`;
+}
+
+function getFixAdvice(kind, items, m) {
+  const hasVeg = items.some(item => item.type === "蔬菜");
+  const hasBanana = items.some(item => item.name === "香蕉");
+  const hasYogurt = items.some(item => item.name === "酸奶");
+  const highSugar = items.filter(item => item.sugar >= 4).map(item => item.name);
+
+  if (kind === "fresh") {
+    if (m.creamy >= 7) return "想更清爽：加 80-120ml 水或椰子水，再放几块冰；如果有黄瓜，加几片会立刻变轻。";
+    if (m.acid < 3) return "想更清爽：加一点柠檬汁、橙子、猕猴桃或莓果，酸味能把整体提亮。";
+    return "这杯已经偏清爽了：少加甜味食材，保留冰块、薄荷或黄瓜就好。";
+  }
+
+  if (kind === "smooth") {
+    if (!hasBanana && m.sugar < 9) return "想更顺滑：加半根香蕉最稳，甜度、香气和稠度都会上来。";
+    if (!hasYogurt) return "想更顺滑：加 100-150ml 无糖酸奶，口感会更像奶昔，也更有饱腹感。";
+    return "想更顺滑：加少量燕麦、奇亚籽或牛油果；如果已经很稠，就同步多加一点液体。";
+  }
+
+  if (kind === "lessSugar") {
+    if (highSugar.length) return `想降甜度：${highSugar.slice(0, 2).join("、")}减半，补黄瓜、菠菜、无糖酸奶或冰块，甜味会稳很多。`;
+    return "这杯甜度不算高：别再加蜂蜜、枫糖浆或葡萄干，液体优先选水、无糖酸奶或无糖豆浆。";
+  }
+
+  if (kind === "hideGreens") {
+    if (!hasVeg) return "这杯没有明显蔬菜味来源。如果觉得味道钝，加一点柠檬、橙子或薄荷就够。";
+    if (m.bitter + m.earthy > m.sweet + m.acid + 2) return "想压住菜味：加橙子/猕猴桃/莓果，再配半根香蕉；酸味负责提亮，香蕉负责把生青味包住。";
+    return "蔬菜味压力不大：用柠檬、橙子或几片姜提一下香气，不需要额外加太多糖。";
+  }
+
+  return "先分析一杯，再选一个想调整的方向。";
+}
+
+function buildShareMessage() {
+  if (!currentAnalysis?.items?.length) {
+    return `${shareData.text}\n${shareData.url}`;
+  }
+
+  const names = currentAnalysis.items.map(item => item.name).join(" + ");
+  const caution = currentAnalysis.warningList.length
+    ? "有注意事项，适合先少量尝试。"
+    : "没有触发明显注意事项。";
+  return [
+    `我刚配了一杯：${names}`,
+    `判断：${currentAnalysis.verdictText}`,
+    `口感：${currentAnalysis.summary}`,
+    `提醒：${caution}`,
+    `你也试试这个小助手：${shareData.url}`
+  ].join("\n");
 }
 
 function buildNotes(items, m) {
@@ -457,7 +537,9 @@ function renderList(node, items) {
 }
 
 function renderEmpty() {
+  currentAnalysis = null;
   verdict.textContent = "先输入食材";
+  summaryLine.textContent = "先把冰箱里的候选食材写上来，我来帮你判断这杯有没有戏。";
   score.textContent = "--";
   scoreRing.style.background = "conic-gradient(#edf3ed 360deg, #edf3ed 0deg)";
   tasteMeter.style.width = "0%";
@@ -466,6 +548,7 @@ function renderEmpty() {
   renderList(notes, ["输入食材后会分析甜度、酸度、苦味、稠度和饱腹感。"]);
   renderList(warnings, ["这里会显示常见禁忌或需要谨慎的人群。"]);
   renderList(suggestions, ["这里会给出可执行的调整建议和推荐搭配。"]);
+  fixTip.textContent = "分析后点一个方向，我会给你更具体的救场方案。";
 }
 
 function renderCategoryTabs() {
@@ -532,6 +615,16 @@ document.querySelectorAll("[data-example]").forEach(button => {
   });
 });
 
+document.querySelectorAll("[data-fix]").forEach(button => {
+  button.addEventListener("click", () => {
+    if (!currentAnalysis) {
+      fixTip.textContent = "先输入并分析一杯，再选想调整的方向。";
+      return;
+    }
+    fixTip.textContent = getFixAdvice(button.dataset.fix, currentAnalysis.items, currentAnalysis.metrics);
+  });
+});
+
 analyzeBtn.addEventListener("click", analyze);
 input.addEventListener("input", analyze);
 foodSearch.addEventListener("input", renderKnownList);
@@ -540,9 +633,9 @@ const shareData = {
   text: "我在用这个健康果蔬搭配小助手：输入水果、蔬菜、酸奶、燕麦等食材，就能判断搭配、口感和常见注意事项。",
   url: "https://zhuolingcheng.github.io/juice-helper/"
 };
-const shareMessage = `${shareData.text}\n${shareData.url}`;
 
 shareBtn.addEventListener("click", () => {
+  const shareMessage = buildShareMessage();
   shareText.value = shareMessage;
   shareOverlay.hidden = false;
   copyText(shareMessage).then(copied => {
@@ -564,6 +657,8 @@ shareOverlay.addEventListener("click", event => {
 });
 
 copyShareBtn.addEventListener("click", async () => {
+  const shareMessage = buildShareMessage();
+  shareText.value = shareMessage;
   const copied = await copyText(shareMessage);
   copyShareBtn.textContent = copied ? "已复制" : "请长按文案复制";
   shareStatus.textContent = copied
