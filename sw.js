@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "juice-helper-v2";
+const CACHE_NAME = "juice-helper-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -33,4 +33,3 @@ self.addEventListener("fetch", event => {
     }).catch(() => caches.match("./index.html")))
   );
 });
-

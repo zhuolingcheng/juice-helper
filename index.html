@@ -1,9 +1,9 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>姒ㄦ眮鎼厤鍔╂墜</title>
+    <title>榨汁搭配助手</title>
     <meta name="theme-color" content="#2f7d54" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="stylesheet" href="./styles.css" />
@@ -11,46 +11,47 @@
   <body>
     <main class="shell">
       <section class="hero">
-        <img class="hero-image" src="./smoothie-ingredients.png" alt="姘存灉銆佽敩鑿溿€侀吀濂跺拰鐕曢害鎽嗗湪鏂欑悊鍙颁笂" />
+        <img class="hero-image" src="./smoothie-ingredients.png" alt="水果、蔬菜、酸奶和燕麦摆在料理台上" />
         <div class="hero-copy">
-          <p class="eyebrow">鏈湴绂荤嚎瑙勫垯寮曟搸</p>
-          <h1>姒ㄦ眮鎼厤鍔╂墜</h1>
+          <p class="eyebrow">本地离线规则引擎</p>
+          <h1>榨汁搭配助手</h1>
           <p>
-            杈撳叆姘存灉銆佽敩鑿溿€侀吀濂躲€佺嚂楹︾瓑椋熸潗锛屽揩閫熷垽鏂鍛虫槸鍚﹀崗璋冦€佽川鍦颁細涓嶄細濂囨€紝浠ュ強鏄惁瑙﹀彂甯歌鍋ュ悍娉ㄦ剰浜嬮」銆?          </p>
+            输入水果、蔬菜、酸奶、燕麦等食材，快速判断风味是否协调、质地会不会奇怪，以及是否触发常见健康注意事项。
+          </p>
         </div>
       </section>
 
-      <section class="workspace" aria-label="鎼厤鍒嗘瀽宸ュ叿">
+      <section class="workspace" aria-label="搭配分析工具">
         <aside class="input-panel">
-          <label for="ingredients">浣犵殑椋熸潗</label>
-          <textarea id="ingredients" rows="5" placeholder="渚嬪锛氶钑夈€佽彔鑿溿€侀吀濂躲€佺嚂楹︺€佽摑鑾?></textarea>
+          <label for="ingredients">你的食材</label>
+          <textarea id="ingredients" rows="5" placeholder="例如：香蕉、菠菜、酸奶、燕麦、蓝莓"></textarea>
 
-          <div class="quick-row" aria-label="蹇€熺ず渚?>
-            <button type="button" data-example="棣欒晧銆佽彔鑿溿€侀吀濂躲€佺嚂楹︺€佽摑鑾?>濂舵様鍨?/button>
-            <button type="button" data-example="鑻规灉銆佽儭钀濆崪銆佹瀛愩€佸">娓呯埥鍨?/button>
-            <button type="button" data-example="瑗挎煔銆佽姽鑿溿€侀粍鐡溿€佹煚妾?>浣庣硸鍨?/button>
-            <button type="button" data-example="鐢滆彍鏍广€佽彔鑿溿€佹潖浠佸ザ銆侀钑?>杩愬姩鍨?/button>
+          <div class="quick-row" aria-label="快速示例">
+            <button type="button" data-example="香蕉、菠菜、酸奶、燕麦、蓝莓">奶昔型</button>
+            <button type="button" data-example="苹果、胡萝卜、橙子、姜">清爽型</button>
+            <button type="button" data-example="西柚、芹菜、黄瓜、柠檬">低糖型</button>
+            <button type="button" data-example="甜菜根、菠菜、杏仁奶、香蕉">运动型</button>
           </div>
 
           <div class="controls">
-            <button class="primary" id="analyzeBtn" type="button">鍒嗘瀽鎼厤</button>
-            <button class="secondary" id="clearBtn" type="button">娓呯┖</button>
+            <button class="primary" id="analyzeBtn" type="button">分析搭配</button>
+            <button class="secondary" id="clearBtn" type="button">清空</button>
           </div>
 
           <div class="library-tools">
-            <label for="foodSearch">椋熸潗搴?/label>
-            <input id="foodSearch" type="search" placeholder="鎼滅储锛氱墰娌规灉銆佽彔鑿溿€佽眴娴?.." autocomplete="off" />
-            <div class="category-tabs" id="categoryTabs" aria-label="椋熸潗鍒嗙被"></div>
+            <label for="foodSearch">食材库</label>
+            <input id="foodSearch" type="search" placeholder="搜索：牛油果、菠菜、豆浆..." autocomplete="off" />
+            <div class="category-tabs" id="categoryTabs" aria-label="食材分类"></div>
           </div>
-          <div class="chips" id="knownList" aria-label="鍙瘑鍒鏉?></div>
-          <p class="install-note" id="installNote">鎵嬫満鎵撳紑缃戝潃鍚庯紝鍙敤娴忚鍣ㄨ彍鍗曟坊鍔犲埌涓诲睆骞曪紱棣栨鍔犺浇鍚庡父鐢ㄥ姛鑳藉彲绂荤嚎鎵撳紑銆?/p>
+          <div class="chips" id="knownList" aria-label="可识别食材"></div>
+          <p class="install-note" id="installNote">手机打开网址后，可用浏览器菜单添加到主屏幕；首次加载后常用功能可离线打开。</p>
         </aside>
 
         <section class="result-panel" aria-live="polite">
           <div class="score-card">
             <div>
-              <p class="muted">缁煎悎鍒ゆ柇</p>
-              <h2 id="verdict">鍏堣緭鍏ラ鏉?/h2>
+              <p class="muted">综合判断</p>
+              <h2 id="verdict">先输入食材</h2>
             </div>
             <div class="score-ring" id="scoreRing">
               <span id="score">--</span>
@@ -59,34 +60,34 @@
 
           <div class="meter-grid">
             <div>
-              <span>鍙ｆ劅</span>
+              <span>口感</span>
               <div class="meter"><i id="tasteMeter"></i></div>
             </div>
             <div>
-              <span>鍧囪　</span>
+              <span>均衡</span>
               <div class="meter"><i id="balanceMeter"></i></div>
             </div>
             <div>
-              <span>娉ㄦ剰</span>
+              <span>注意</span>
               <div class="meter warning"><i id="riskMeter"></i></div>
             </div>
           </div>
 
           <div class="sections">
             <article>
-              <h3>璇嗗埆缁撴灉</h3>
+              <h3>识别结果</h3>
               <div class="tag-list" id="recognized"></div>
             </article>
             <article>
-              <h3>鎼厤璇勪环</h3>
+              <h3>搭配评价</h3>
               <ul id="notes"></ul>
             </article>
             <article>
-              <h3>娉ㄦ剰浜嬮」</h3>
+              <h3>注意事项</h3>
               <ul id="warnings"></ul>
             </article>
             <article>
-              <h3>鎺ㄨ崘璋冩暣</h3>
+              <h3>推荐调整</h3>
               <ul id="suggestions"></ul>
             </article>
           </div>
@@ -95,22 +96,23 @@
 
       <section class="reference-strip">
         <details>
-          <summary>閲嶈璇存槑鍜屼緷鎹?/summary>
+          <summary>重要说明和依据</summary>
           <p>
-            杩欎釜宸ュ叿鐢ㄤ簬鏃ュ父楗搧鎼厤鍙傝€冿紝涓嶆浛浠ｅ尰鐢熴€佽嵂甯堟垨钀ュ吇甯堝缓璁€傝嫢浣犳鍦ㄦ湇鑽€佹€€瀛曘€佹湁鑲剧梾銆佺硸灏跨梾銆佽儍椋熺鍙嶆祦銆佽偩缁撶煶鍙叉垨椋熺墿杩囨晱锛岃浼樺厛鎸変笓涓氬尰鍢卞鐞嗐€?          </p>
+            这个工具用于日常饮品搭配参考，不替代医生、药师或营养师建议。若你正在服药、怀孕、有肾病、糖尿病、胃食管反流、肾结石史或食物过敏，请优先按专业医嘱处理。
+          </p>
           <ul>
-            <li>钁¤悇鏌?瑗挎煔鍙兘褰卞搷澶氱被鑽墿浠ｈ阿锛屾湇鑽汉缇ら渶鍚戝尰鐢熸垨鑽笀纭銆?/li>
-            <li>鑿犺彍銆佺窘琛ｇ敇钃濈瓑娣辩豢鍙惰彍瀵屽惈缁寸敓绱?K锛屼娇鐢ㄥ崕娉曟灄鑰呭簲淇濇寔鎽勫叆绋冲畾骞堕伒鍖诲槺銆?/li>
-            <li>鑿犺彍銆佺敎鑿溿€佸潥鏋滅瓑楂樿崏閰搁鏉愬彲鑳戒笉閫傚悎閮ㄥ垎鑲剧粨鐭抽珮椋庨櫓浜虹兢棰戠箒澶ч噺楗敤銆?/li>
-            <li>棣欒晧銆佺墰娌规灉銆佹ぐ瀛愭按绛夐珮閽鹃鏉愶紝鎱㈡€ц偩鐥呮垨闇€闄愰捑鑰呭簲璋ㄦ厧銆?/li>
-            <li>鏋滆敩姒ㄦ眮鍓嶅簲鍏呭垎娓呮礂锛涜眴鑺姐€侀矞鍒囨灉钄€佹湭宸存皬鏉€鑿屾灉姹佸鍏嶇柅鍔涜緝寮辫€呴闄╂洿楂樸€?/li>
+            <li>葡萄柚/西柚可能影响多类药物代谢，服药人群需向医生或药师确认。</li>
+            <li>菠菜、羽衣甘蓝等深绿叶菜富含维生素 K，使用华法林者应保持摄入稳定并遵医嘱。</li>
+            <li>菠菜、甜菜、坚果等高草酸食材可能不适合部分肾结石高风险人群频繁大量饮用。</li>
+            <li>香蕉、牛油果、椰子水等高钾食材，慢性肾病或需限钾者应谨慎。</li>
+            <li>果蔬榨汁前应充分清洗；豆芽、鲜切果蔬、未巴氏杀菌果汁对免疫力较弱者风险更高。</li>
           </ul>
           <p class="source-links">
-            鍙傝€冿細
-            <a href="https://www.fda.gov/consumers/consumer-updates/grapefruit-juice-and-some-drugs-dont-mix">FDA 瑗挎煔涓庤嵂鐗?/a>
-            <a href="https://ods.od.nih.gov/factsheets/VitaminK-Consumer/">NIH 缁寸敓绱?K</a>
-            <a href="https://www.kidney.org/kidney-topics/calcium-kidney-stones">NKF 鑽夐吀涓庤偩缁撶煶</a>
-            <a href="https://www.fda.gov/food/buy-store-serve-safe-food/what-you-need-know-about-juice-safety">FDA 鏋滄眮瀹夊叏</a>
+            参考：
+            <a href="https://www.fda.gov/consumers/consumer-updates/grapefruit-juice-and-some-drugs-dont-mix">FDA 西柚与药物</a>
+            <a href="https://ods.od.nih.gov/factsheets/VitaminK-Consumer/">NIH 维生素 K</a>
+            <a href="https://www.kidney.org/kidney-topics/calcium-kidney-stones">NKF 草酸与肾结石</a>
+            <a href="https://www.fda.gov/food/buy-store-serve-safe-food/what-you-need-know-about-juice-safety">FDA 果汁安全</a>
           </p>
         </details>
       </section>
@@ -119,4 +121,3 @@
     <script src="./app.js"></script>
   </body>
 </html>
-
