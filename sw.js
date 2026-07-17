@@ -1,4 +1,4 @@
-const CACHE_NAME = "juice-helper-v7";
+const CACHE_NAME = "juice-helper-v8";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const ASSETS = [
   "./app-icon.svg",
   "./apple-touch-icon.png",
   "./social-preview.png",
+  "./hero-vibrant.png",
   "./smoothie-ingredients.png"
 ];
 

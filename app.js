@@ -98,6 +98,117 @@ const EXTRA_INGREDIENTS = [
 
 INGREDIENTS.push(...EXTRA_INGREDIENTS);
 
+const TYPE_ICONS = {
+  全部: "✦",
+  水果: "🍓",
+  蔬菜: "🥬",
+  调味: "🌿",
+  乳制品: "🥣",
+  植物奶: "🌱",
+  谷物: "🌾",
+  种子: "⚫",
+  坚果: "🥜",
+  甜味: "🍯",
+  液体: "💧",
+  薯类: "🍠",
+  豆类: "🫘"
+};
+
+const INGREDIENT_ICONS = {
+  香蕉: "🍌",
+  苹果: "🍎",
+  梨: "🍐",
+  草莓: "🍓",
+  蓝莓: "🫐",
+  芒果: "🥭",
+  菠萝: "🍍",
+  橙子: "🍊",
+  柠檬: "🍋",
+  西柚: "🍊",
+  猕猴桃: "🥝",
+  西瓜: "🍉",
+  牛油果: "🥑",
+  菠菜: "🥬",
+  羽衣甘蓝: "🥬",
+  生菜: "🥬",
+  芹菜: "🌿",
+  黄瓜: "🥒",
+  胡萝卜: "🥕",
+  甜菜根: "🧃",
+  番茄: "🍅",
+  紫甘蓝: "🥬",
+  西兰花: "🥦",
+  姜: "🫚",
+  薄荷: "🌿",
+  酸奶: "🥣",
+  牛奶: "🥛",
+  豆浆: "🥛",
+  杏仁奶: "🥛",
+  燕麦: "🌾",
+  奇亚籽: "⚫",
+  亚麻籽: "🌰",
+  花生酱: "🥜",
+  蜂蜜: "🍯",
+  椰子水: "🥥",
+  葡萄: "🍇",
+  桃子: "🍑",
+  油桃: "🍑",
+  李子: "🟣",
+  樱桃: "🍒",
+  石榴: "🔴",
+  火龙果: "🌺",
+  百香果: "🟡",
+  木瓜: "🟠",
+  哈密瓜: "🍈",
+  椰肉: "🥥",
+  蔓越莓: "🔴",
+  黑莓: "🫐",
+  覆盆子: "🍓",
+  青提: "🍇",
+  柚子: "🍊",
+  青柠: "🟢",
+  小白菜: "🥬",
+  上海青: "🥬",
+  油麦菜: "🥬",
+  香菜: "🌿",
+  欧芹: "🌿",
+  罗勒: "🌿",
+  苦瓜: "🥒",
+  南瓜: "🎃",
+  红薯: "🍠",
+  山药: "🍠",
+  玉米: "🌽",
+  豌豆: "🟢",
+  毛豆: "🫛",
+  豆腐: "◻",
+  可可粉: "🍫",
+  肉桂粉: "✨",
+  抹茶粉: "🍵",
+  绿茶: "🍵",
+  咖啡: "☕",
+  燕麦奶: "🥛",
+  椰奶: "🥥",
+  开菲尔: "🥣",
+  奶酪: "🧀",
+  核桃: "🌰",
+  腰果: "🌰",
+  杏仁: "🌰",
+  芝麻: "⚫",
+  南瓜籽: "🌱",
+  葵花籽: "🌻",
+  红枣: "🟤",
+  葡萄干: "🍇",
+  枫糖浆: "🍯",
+  代糖: "✨",
+  冰块: "🧊",
+  苏打水: "🫧",
+  海盐: "🧂",
+  黑胡椒: "⚫",
+  辣椒: "🌶",
+  芦荟: "🌵",
+  豆芽: "🌱"
+};
+
 const COMMON_WARNINGS = [
   {
     test: items => items.some(i => i.grapefruit),
@@ -257,6 +368,10 @@ function clamp(value) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
+function getIngredientIcon(item) {
+  return INGREDIENT_ICONS[item.name] || TYPE_ICONS[item.type] || "•";
+}
+
 function buildNotes(items, m) {
   const list = [];
   const names = items.map(i => i.name).join("、");
@@ -292,19 +407,43 @@ function buildSuggestions(items, m, warningList) {
 function renderRecognized(matched, unknown) {
   recognized.innerHTML = "";
   matched.forEach(item => {
-    const span = document.createElement("span");
-    span.className = "tag";
-    span.textContent = `${item.name} · ${item.type}`;
-    recognized.appendChild(span);
+    const card = document.createElement("span");
+    card.className = "ingredient-card";
+
+    const icon = document.createElement("span");
+    icon.className = "ingredient-icon";
+    icon.textContent = getIngredientIcon(item);
+
+    const main = document.createElement("span");
+    main.className = "ingredient-main";
+
+    const name = document.createElement("strong");
+    name.textContent = item.name;
+
+    const meta = document.createElement("span");
+    meta.className = "ingredient-meta";
+    meta.textContent = item.type;
+
+    const tags = document.createElement("span");
+    tags.className = "ingredient-tags";
+    tags.textContent = item.tags.slice(0, 2).join(" · ");
+
+    main.append(name, meta, tags);
+    card.append(icon, main);
+    recognized.appendChild(card);
   });
   unknown.forEach(name => {
-    const span = document.createElement("span");
-    span.className = "tag unknown";
-    span.textContent = `${name} · 暂未收录`;
-    recognized.appendChild(span);
+    const card = document.createElement("span");
+    card.className = "ingredient-card unknown";
+    card.innerHTML = `<span class="ingredient-icon">?</span><span class="ingredient-main"><strong></strong><span class="ingredient-meta">暂未收录</span><span class="ingredient-tags">可手动判断，后续再补充</span></span>`;
+    card.querySelector("strong").textContent = name;
+    recognized.appendChild(card);
   });
   if (!matched.length && !unknown.length) {
-    recognized.textContent = "还没有输入。";
+    const empty = document.createElement("span");
+    empty.className = "empty-state";
+    empty.textContent = "还没有输入。";
+    recognized.appendChild(empty);
   }
 }
 
@@ -335,8 +474,13 @@ function renderCategoryTabs() {
   categories.forEach(category => {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = category;
     button.className = category === activeCategory ? "active" : "";
+    const icon = document.createElement("span");
+    icon.className = "tab-icon";
+    icon.textContent = TYPE_ICONS[category] || "•";
+    const text = document.createElement("span");
+    text.textContent = category;
+    button.append(icon, text);
     button.addEventListener("click", () => {
       activeCategory = category;
       renderCategoryTabs();
@@ -359,7 +503,13 @@ function renderKnownList() {
     const button = document.createElement("button");
     button.className = "chip";
     button.type = "button";
-    button.textContent = item.name;
+    button.title = `${item.name} · ${item.type}`;
+    const icon = document.createElement("span");
+    icon.className = "chip-icon";
+    icon.textContent = getIngredientIcon(item);
+    const text = document.createElement("span");
+    text.textContent = item.name;
+    button.append(icon, text);
     button.addEventListener("click", () => {
       const existing = input.value.trim();
       input.value = existing ? `${existing}、${item.name}` : item.name;

@@ -39,7 +39,7 @@ input {
 
 .hero {
   position: relative;
-  min-height: 310px;
+  min-height: 330px;
   overflow: hidden;
   border-radius: 8px;
   box-shadow: var(--shadow);
@@ -52,13 +52,14 @@ input {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 .hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.93), rgba(255, 255, 255, 0.65) 42%, rgba(255, 255, 255, 0.08));
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.78) 36%, rgba(255, 255, 255, 0.2) 66%, rgba(255, 255, 255, 0.04) 100%);
 }
 
 .hero-copy {
@@ -196,18 +197,23 @@ button:hover {
   min-width: 86px;
 }
 
-.chips,
-.tag-list {
+.chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .chips {
   margin-top: 20px;
-  max-height: 210px;
+  max-height: 250px;
   overflow: auto;
   padding-right: 4px;
+}
+
+.tag-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
 }
 
 .library-tools {
@@ -227,6 +233,9 @@ button:hover {
 }
 
 .category-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex: 0 0 auto;
   min-height: 34px;
   padding: 0 11px;
@@ -238,7 +247,34 @@ button:hover {
   background: var(--leaf);
 }
 
-.chip,
+.tab-icon,
+.chip-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.chip-icon {
+  width: 26px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: #f3faf5;
+  font-size: 17px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border-radius: 8px;
+  padding: 6px 12px 6px 8px;
+  background: #fff;
+  color: #22573e;
+  font-size: 14px;
+  box-shadow: 0 6px 16px rgba(39, 53, 48, 0.06);
+}
+
 .tag {
   display: inline-flex;
   align-items: center;
@@ -248,6 +284,67 @@ button:hover {
   background: var(--mint);
   color: #22573e;
   font-size: 13px;
+}
+
+.ingredient-card {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid #dbe8df;
+  border-radius: 8px;
+  padding: 10px;
+  background: linear-gradient(135deg, #ffffff, #f7fbf7);
+  box-shadow: 0 8px 20px rgba(39, 53, 48, 0.07);
+}
+
+.ingredient-card.unknown {
+  border-color: #ead8c3;
+  background: linear-gradient(135deg, #fffaf5, #f7efe6);
+}
+
+.ingredient-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: #edf7f1;
+  font-size: 26px;
+}
+
+.ingredient-card.unknown .ingredient-icon {
+  background: #f2e4d5;
+  color: #7a4a25;
+  font-weight: 800;
+}
+
+.ingredient-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ingredient-main strong {
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ingredient-meta,
+.ingredient-tags,
+.empty-state {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.ingredient-tags {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tag.unknown {
