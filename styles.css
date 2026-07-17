@@ -79,12 +79,12 @@ input {
 h1 {
   margin: 0 0 14px;
   font-family: "LXGW WenKai", "Kaiti SC", "STKaiti", "KaiTi", "Microsoft YaHei", sans-serif;
-  font-size: clamp(36px, 5.4vw, 62px);
-  font-weight: 800;
-  line-height: 1.08;
+  font-size: clamp(28px, 4.4vw, 54px);
+  font-weight: 700;
+  line-height: 1.12;
   letter-spacing: 0;
   color: #1f3b32;
-  text-wrap: balance;
+  white-space: nowrap;
   text-shadow: 0 3px 0 rgba(246, 185, 75, 0.18), 0 14px 28px rgba(31, 42, 40, 0.12);
 }
 
@@ -584,7 +584,8 @@ details p {
   }
 
   .hero-copy {
-    padding: 28px;
+    width: min(620px, 94%);
+    padding: 28px 24px;
   }
 
   .meter-grid {
