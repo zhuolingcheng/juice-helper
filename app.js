@@ -536,8 +536,8 @@ analyzeBtn.addEventListener("click", analyze);
 input.addEventListener("input", analyze);
 foodSearch.addEventListener("input", renderKnownList);
 const shareData = {
-  title: "榨汁搭配助手",
-  text: "我在用这个榨汁搭配助手：输入水果、蔬菜、酸奶、燕麦等食材，就能判断搭配、口感和常见注意事项。",
+  title: "健康果蔬搭配小助手",
+  text: "我在用这个健康果蔬搭配小助手：输入水果、蔬菜、酸奶、燕麦等食材，就能判断搭配、口感和常见注意事项。",
   url: "https://zhuolingcheng.github.io/juice-helper/"
 };
 const shareMessage = `${shareData.text}\n${shareData.url}`;

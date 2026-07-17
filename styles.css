@@ -78,9 +78,14 @@ input {
 
 h1 {
   margin: 0 0 14px;
-  font-size: clamp(34px, 5vw, 58px);
-  line-height: 1.02;
+  font-family: "LXGW WenKai", "Kaiti SC", "STKaiti", "KaiTi", "Microsoft YaHei", sans-serif;
+  font-size: clamp(36px, 5.4vw, 62px);
+  font-weight: 800;
+  line-height: 1.08;
   letter-spacing: 0;
+  color: #1f3b32;
+  text-wrap: balance;
+  text-shadow: 0 3px 0 rgba(246, 185, 75, 0.18), 0 14px 28px rgba(31, 42, 40, 0.12);
 }
 
 .hero-copy p:last-child {
