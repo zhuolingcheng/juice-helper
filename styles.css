@@ -90,6 +90,8 @@ h1 {
 }
 
 .workspace {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: 390px 1fr;
   gap: 18px;
@@ -105,7 +107,13 @@ h1 {
   box-shadow: 0 14px 38px rgba(39, 53, 48, 0.08);
 }
 
+.workspace > *,
+.sections > * {
+  min-width: 0;
+}
+
 .input-panel {
+  width: 100%;
   padding: 22px;
 }
 
@@ -254,6 +262,66 @@ button:hover {
   line-height: 1.55;
 }
 
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(31, 42, 40, 0.46);
+}
+
+.share-overlay[hidden] {
+  display: none;
+}
+
+.share-panel {
+  position: relative;
+  width: min(520px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px;
+  background: #fffefb;
+  box-shadow: var(--shadow);
+}
+
+.share-panel h2 {
+  margin-right: 42px;
+  font-size: 24px;
+}
+
+.share-panel p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.share-panel textarea {
+  min-height: 112px;
+  background: #f7faf4;
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.icon-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  min-height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+}
+
 .result-panel {
   padding: 22px;
 }
@@ -390,6 +458,21 @@ details p {
     grid-template-columns: 1fr;
   }
 
+  .controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 92px 92px;
+    align-items: stretch;
+  }
+
+  .controls button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .controls .primary {
+    flex: none;
+  }
+
   .hero {
     min-height: 360px;
   }
@@ -411,6 +494,14 @@ details p {
   .shell {
     width: min(100% - 20px, 1180px);
     padding-top: 10px;
+  }
+
+  .controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .controls .primary {
+    grid-column: 1 / -1;
   }
 
   .score-card {
